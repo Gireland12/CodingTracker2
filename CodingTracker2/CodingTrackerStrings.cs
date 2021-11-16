@@ -103,10 +103,10 @@ namespace CodingTracker2
 
             do
             {
-                Console.WriteLine("------------------------------------------");
-                Console.WriteLine("|What Date is your entry for? dd-MM-yyyy |");
-                Console.WriteLine("|Or press '0' to go back to main menu... |");
-                Console.WriteLine("------------------------------------------");
+                Console.WriteLine("--------------------------------------------");
+                Console.WriteLine("|  What Date is your entry for? dd-MM-yyyy  |");
+                Console.WriteLine("|  Or press '0' to go back to main menu...  |");
+                Console.WriteLine("--------------------------------------------");
 
                 DateString = Console.ReadLine();
 
@@ -125,9 +125,9 @@ namespace CodingTracker2
 
                 if (!parseSuccess1)
                 {
-                    Console.WriteLine("-----------------");
-                    Console.WriteLine("|  Invalid date  |");
-                    Console.WriteLine("-----------------");
+                    Console.WriteLine("--------------------------------------------");
+                    Console.WriteLine("|               Invalid date                |");
+                    Console.WriteLine("--------------------------------------------");
                 }
 
 
@@ -156,9 +156,9 @@ namespace CodingTracker2
                 }
                 if (!parseSuccess2)
                 {
-                    Console.WriteLine("-----------------");
-                    Console.WriteLine("|  Invalid time |");
-                    Console.WriteLine("-----------------");
+                    Console.WriteLine("--------------------------------------------");
+                    Console.WriteLine("|               Invalid time                |");
+                    Console.WriteLine("--------------------------------------------");
                 }
 
 
@@ -175,11 +175,12 @@ namespace CodingTracker2
             command.ExecuteNonQuery();
             connection.Close();
 
-            Console.WriteLine("------------------------------------------");
-            Console.WriteLine("|        Log added succesfuly            |");
-            Console.WriteLine("------------------------------------------");
-            Console.WriteLine();
-            Console.WriteLine("Press any key to return to the main menu or press 0 to QUIT...");
+            Console.WriteLine("----------------------------------------------------------------");
+            Console.WriteLine("|                   Log added succesfuly                        |");
+            Console.WriteLine("|                                                               |");
+            Console.WriteLine("|Press any key to return to the main menu or press 0 to QUIT... |");
+            Console.WriteLine("|                                                               |");
+            Console.WriteLine("----------------------------------------------------------------");
 
             string UserAnswer = (Console.ReadLine());
 
@@ -189,7 +190,9 @@ namespace CodingTracker2
             }
             else
             {
-                Console.WriteLine("GoodBye!");
+                Console.WriteLine("--------------------------------------------");
+                Console.WriteLine("|               Goodbye!                   |");
+                Console.WriteLine("--------------------------------------------");
                 Environment.Exit(0);
             }
 
@@ -214,43 +217,73 @@ namespace CodingTracker2
         {
             int Hours, InputDate, InputHours;
             string DateString, HoursString;
-            bool parseSuccess1, parseSuccess2;
+            bool parseSuccess1 = false;
+            bool parseSuccess2 = false;
+            DateTime dDate;
 
-            Console.WriteLine("---------------------------------------------------------");
-            Console.WriteLine("| What date would you like to edit? Type Below DDMMYYYY |");
-            Console.WriteLine("|Or press '0' to go back to main menu...                |");
-            Console.WriteLine("---------------------------------------------------------");
-
-            DateString = (Console.ReadLine());
-            parseSuccess1 = int.TryParse(DateString, out InputDate);
-
-
-
-            while (parseSuccess1)
+            do
             {
-                if (InputDate == 0)
+                Console.WriteLine("---------------------------------------------------------");
+                Console.WriteLine("| What date would you like to edit? dd-MM-yyyy          |");
+                Console.WriteLine("|Or press '0' to go back to main menu...                |");
+                Console.WriteLine("---------------------------------------------------------");
+
+                DateString = (Console.ReadLine());
+
+
+                if (DateTime.TryParseExact(DateString, "dd-MM-yyyy", new CultureInfo("en-US"), DateTimeStyles.None, out dDate))
+                {
+                    parseSuccess1 = true;
+                }
+
+                if (DateString == "0")
                 {
                     WelcomeMessage();
                 }
+
+                if (!parseSuccess1)
+                {
+                    Console.WriteLine("-----------------");
+                    Console.WriteLine("|  Invalid date  |");
+                    Console.WriteLine("-----------------");
+                }
+            } while (!parseSuccess1);
+
+            do
+            {
 
                 Console.WriteLine("--------------------------------------------");
                 Console.WriteLine("|How many hours would you like to log?     |");
                 Console.WriteLine("|Or press '0' to go back to main menu...   |");
                 Console.WriteLine("--------------------------------------------");
+                
                 HoursString = (Console.ReadLine());
-                parseSuccess2 = int.TryParse(HoursString, out InputHours);
+               
 
-                if (InputHours == 0)
+                if (DateTime.TryParseExact(HoursString, "HH:mm", new CultureInfo("en-US"), DateTimeStyles.None, out dDate))
+                {
+                    parseSuccess2 = true;
+                }
+
+                if (HoursString == "0")
                 {
                     WelcomeMessage();
                 }
+                if (!parseSuccess2)
+                {
+                    Console.WriteLine("-----------------");
+                    Console.WriteLine("|  Invalid time |");
+                    Console.WriteLine("-----------------");
+                }
+                
+                HoursString = HoursString.PadLeft(5, '0');
 
                 while (parseSuccess2)
                 {
                     string dbFile = "URI=file:CodingTrackerDB.db";
                     SQLiteConnection connection = new SQLiteConnection(dbFile);
                     connection.Open();
-                    string EditHours = $"update CodeTracker set HOURS={InputHours} where DATE= {InputDate};";
+                    string EditHours = $"update CodeTracker set HOURS='{HoursString}' where DATE= '{DateString}';";
                     SQLiteCommand command = new SQLiteCommand(EditHours, connection);
                     command.ExecuteNonQuery();
                     connection.Close();
@@ -268,7 +301,8 @@ namespace CodingTracker2
                         Console.WriteLine("GoodBye!");
                         Environment.Exit(0);
                     }
-                } while (!parseSuccess2)
+                }
+            } while (!parseSuccess2);
                 {
                     Console.WriteLine("Not a valid answer, please try again");
 
@@ -282,26 +316,7 @@ namespace CodingTracker2
                     parseSuccess2 = int.TryParse(DateString, out InputDate);
                 }
 
-            } while (!parseSuccess1)
-            {
-                Console.WriteLine("--------------------------------------------");
-                Console.WriteLine("|  Not a valid answer, please try again    |");
-                Console.WriteLine("--------------------------------------------");
-
-                InputDate = default(int);
-                DateString = default(string);
-                parseSuccess1 = false;
-
-                Console.WriteLine("---------------------------------------------------------");
-                Console.WriteLine("| What date would you like to edit? Type Below DDMMYYYY |");
-                Console.WriteLine("|Or press '0' to go back to main menu...                |");
-                Console.WriteLine("---------------------------------------------------------");
-
-                DateString = (Console.ReadLine());
-
-                parseSuccess1 = int.TryParse(DateString, out InputDate);
-
-            }
+            
         }
 
         static void ReadTable()
