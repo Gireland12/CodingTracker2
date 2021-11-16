@@ -23,6 +23,7 @@ namespace CodingTracker2
             Console.WriteLine("|        1. Log coding hours...         |");
             Console.WriteLine("|        2. View coding log...          |");
             Console.WriteLine("|        3. Edit coding log...          |");
+            Console.WriteLine("|        4. Delete from coding log...   |");
             Console.WriteLine("|        0. Quit...                     |");
             Console.WriteLine("----------------------------------------");
 
@@ -38,7 +39,9 @@ namespace CodingTracker2
                 Console.WriteLine();
                 ReadTable();
                 Console.WriteLine();
-                Console.WriteLine("Press any key to return to the main menu or press 0 to QUIT");
+                Console.WriteLine("---------------------------------------------------------------");
+                Console.WriteLine("|  Press any key to return to the main menu or press 0 to QUIT |");
+                Console.WriteLine("---------------------------------------------------------------");
                 string UserAnswer = (Console.ReadLine());
                 if (UserAnswer != "0")
                 {
@@ -55,7 +58,9 @@ namespace CodingTracker2
             {
                 EditRow();
                 Console.WriteLine();
-                Console.WriteLine("Press any key to return to the main menu or press 0 to QUIT");
+                Console.WriteLine("---------------------------------------------------------------");
+                Console.WriteLine("|  Press any key to return to the main menu or press 0 to QUIT |");
+                Console.WriteLine("---------------------------------------------------------------");
                 string UserAnswer = (Console.ReadLine());
                 if (UserAnswer != "0")
                 {
@@ -64,6 +69,26 @@ namespace CodingTracker2
                 else
                 {
                     Console.WriteLine("GoodBye!");
+                    Environment.Exit(0);
+                }
+            }
+            if (WelcomeAnswer == "4")
+            {
+                DeleteRow();
+                Console.WriteLine();
+                Console.WriteLine("---------------------------------------------------------------");
+                Console.WriteLine("|  Press any key to return to the main menu or press 0 to QUIT |");
+                Console.WriteLine("---------------------------------------------------------------");
+                string UserAnswer = (Console.ReadLine());
+                if (UserAnswer != "0")
+                {
+                    WelcomeMessage();
+                }
+                else
+                {
+                    Console.WriteLine("-------------");
+                    Console.WriteLine("| GoodBye!  |");
+                    Console.WriteLine("-------------");
                     Environment.Exit(0);
                 }
             }
@@ -78,7 +103,9 @@ namespace CodingTracker2
 
             if (WelcomeAnswer != "0" && WelcomeAnswer != "1" && WelcomeAnswer != "2" && WelcomeAnswer != "3")
             {
-                Console.WriteLine("Not a valid answer, please try again");
+                Console.WriteLine("----------------------------------------");
+                Console.WriteLine("| Not a valid answer, please try again |");
+                Console.WriteLine("----------------------------------------");
                 WelcomeMessage();
             }
         }
@@ -198,18 +225,53 @@ namespace CodingTracker2
         }
 
 
-        //static void DeleteRow()
-        /*{
+        static void DeleteRow()
+        {
+            string DateString;
+            bool parseSuccess1 = false;
+            DateTime dDate;
+
+            do
+            {
+                Console.WriteLine("---------------------------------------------------------");
+                Console.WriteLine("| What date would you like to delete? dd-MM-yyyy        |");
+                Console.WriteLine("|  Or press '0' to go back to main menu...              |");
+                Console.WriteLine("---------------------------------------------------------");
+
+                DateString = (Console.ReadLine());
+
+
+                if (DateTime.TryParseExact(DateString, "dd-MM-yyyy", new CultureInfo("en-US"), DateTimeStyles.None, out dDate))
+                {
+                    parseSuccess1 = true;
+                }
+
+                if (DateString == "0")
+                {
+                    WelcomeMessage();
+                }
+
+                if (!parseSuccess1)
+                {
+                    Console.WriteLine("-----------------");
+                    Console.WriteLine("|  Invalid date  |");
+                    Console.WriteLine("-----------------");
+                }
+            } while (!parseSuccess1);
+
             string dbFile = "URI=file:CodingTrackerDB.db";
             SQLiteConnection connection = new SQLiteConnection(dbFile);
             connection.Open();
-            string DeleteHours = "Delete from CodeTracker where date=15112021;";
+            string DeleteHours = $"Delete from CodeTracker where DATE= '{DateString}';";
             SQLiteCommand command = new SQLiteCommand(DeleteHours, connection);
             command.ExecuteNonQuery();
             connection.Close();
-            Console.WriteLine("Row deleted succesfuly");
-            Console.ReadLine();
-        }*/
+
+            Console.WriteLine("----------------------------");
+            Console.WriteLine("|  Row deleted succesfuly  |");
+            Console.WriteLine("----------------------------");
+        }
+        
 
         static void EditRow()
         {
@@ -250,10 +312,10 @@ namespace CodingTracker2
             do
             {
 
-                Console.WriteLine("--------------------------------------------");
-                Console.WriteLine("|How many hours would you like to log?     |");
-                Console.WriteLine("|Or press '0' to go back to main menu...   |");
-                Console.WriteLine("--------------------------------------------");
+                Console.WriteLine("----------------------------------------------");
+                Console.WriteLine("| How many hours would you like to log? HH:mm |");
+                Console.WriteLine("| Or press '0' to go back to main menu...     |");
+                Console.WriteLine("----------------------------------------------");
                 
                 HoursString = (Console.ReadLine());
                
@@ -285,9 +347,11 @@ namespace CodingTracker2
                     SQLiteCommand command = new SQLiteCommand(EditHours, connection);
                     command.ExecuteNonQuery();
                     connection.Close();
-                    Console.WriteLine("Row edited succesfuly");
-                    Console.WriteLine();
-                    Console.WriteLine("Press any key to return to the main menu or press 0 to QUIT");
+                    Console.WriteLine("----------------------------------------------------------------");
+                    Console.WriteLine("|                    Row edited succesfuly                     |"); 
+                    Console.WriteLine("|                                                              |");
+                    Console.WriteLine("| Press any key to return to the main menu or press 0 to QUIT  |");
+                    Console.WriteLine("----------------------------------------------------------------");
 
                     string UserAnswer = (Console.ReadLine());
                     if (UserAnswer != "0")
@@ -296,19 +360,28 @@ namespace CodingTracker2
                     }
                     else
                     {
-                        Console.WriteLine("GoodBye!");
+                        Console.WriteLine("--------------------------------------------");
+                        Console.WriteLine("|               Goodbye!                   |");
+                        Console.WriteLine("--------------------------------------------");
                         Environment.Exit(0);
                     }
                 }
             } while (!parseSuccess2);
                 {
-                    Console.WriteLine("Not a valid answer, please try again");
+                Console.WriteLine("--------------------------------------------");
+                Console.WriteLine("|    Not a valid answer, please try again   |");
+                Console.WriteLine("--------------------------------------------");
 
-                    HoursString = default(string);
+                HoursString = default(string);
                     parseSuccess2 = false;
 
-                    Console.WriteLine("How many hours would you like to log?");
-                    HoursString = (Console.ReadLine());
+                
+                HoursString = (Console.ReadLine());
+
+                if(HoursString == "0")
+                {
+                    WelcomeMessage();
+                }
 
                     parseSuccess2 = int.TryParse(DateString, out InputDate);
                 }
