@@ -110,7 +110,6 @@ namespace CodingTracker2
 
                 DateString = Console.ReadLine();
 
-                int InputDate;
                 DateTime dDate;
 
                 if (DateTime.TryParseExact(DateString, "dd-MM-yyyy", new CultureInfo("en-US"), DateTimeStyles.None, out dDate))
@@ -146,8 +145,7 @@ namespace CodingTracker2
                 if (DateTime.TryParse(HoursString, out dTime))
                 {
                     String.Format("{0:HH:mm}", dTime);
-                    //Console.WriteLine($"{dTime}");
-                    parseSuccess2 = DateTime.TryParse(HoursString, out dTime);
+                    parseSuccess2 = true;
                 }
 
                 if (HoursString == "0")
@@ -200,8 +198,8 @@ namespace CodingTracker2
         }
 
 
-        static void DeleteRow()
-        {
+        //static void DeleteRow()
+        /*{
             string dbFile = "URI=file:CodingTrackerDB.db";
             SQLiteConnection connection = new SQLiteConnection(dbFile);
             connection.Open();
@@ -211,11 +209,11 @@ namespace CodingTracker2
             connection.Close();
             Console.WriteLine("Row deleted succesfuly");
             Console.ReadLine();
-        }
+        }*/
 
         static void EditRow()
         {
-            int Hours, InputDate, InputHours;
+            int  InputDate;
             string DateString, HoursString;
             bool parseSuccess1 = false;
             bool parseSuccess2 = false;
@@ -306,7 +304,6 @@ namespace CodingTracker2
                 {
                     Console.WriteLine("Not a valid answer, please try again");
 
-                    InputHours = default(int);
                     HoursString = default(string);
                     parseSuccess2 = false;
 
@@ -330,8 +327,8 @@ namespace CodingTracker2
             using var command = new SQLiteCommand(stm, connection);
             using SQLiteDataReader rdr = command.ExecuteReader();
 
-            Console.WriteLine("------------------------------");
-            Console.WriteLine("DD/MM/YYYY              HOURS");
+            Console.WriteLine("----------------------------------");
+            Console.WriteLine("DD/MM/YYYY                  HOURS");
 
             while (rdr.Read())
             {
@@ -339,7 +336,7 @@ namespace CodingTracker2
                 Console.WriteLine($"{rdr.GetString(0)}                 {rdr.GetString(1)}");
 
             }
-            Console.WriteLine("------------------------------");
+            Console.WriteLine("----------------------------------");
         }
     }
 }
