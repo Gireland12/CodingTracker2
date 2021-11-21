@@ -2,6 +2,10 @@
 using System.IO;
 using System.Data.SQLite;
 using System.Globalization;
+using ConsoleTableExt;
+using System.Collections.Generic;
+using System.Configuration;
+
 
 namespace CodingTracker2
 {
@@ -18,14 +22,31 @@ namespace CodingTracker2
         {
             string WelcomeAnswer;
 
-            Console.WriteLine("----------------------------------------");
-            Console.WriteLine("|        Main Menu                      |");
-            Console.WriteLine("|        1. Log coding hours...         |");
-            Console.WriteLine("|        2. View coding log...          |");
-            Console.WriteLine("|        3. Edit coding log...          |");
-            Console.WriteLine("|        4. Delete from coding log...   |");
-            Console.WriteLine("|        0. Quit...                     |");
-            Console.WriteLine("----------------------------------------");
+            var MenuTable = new List<List<object>>
+                {
+                    new List<object>{ "1. Log coding hours..."},
+                    new List<object>{ "2. View coding log..."},
+                    new List<object>{ "3. Edit coding log..."},
+                    new List<object>{ "4. Delete from coding log..."},
+                    new List<object>{ "0. Quit... "},
+                };
+
+            ConsoleTableBuilder
+                .From(MenuTable)
+                .WithTitle("MAIN MENU", ConsoleColor.Green, ConsoleColor.Black)
+                .WithTextAlignment(new Dictionary<int, TextAligntment>
+                    {
+                            {2, TextAligntment.Center}
+                    })
+                .WithCharMapDefinition(new Dictionary<CharMapPositions, char> {
+                    {CharMapPositions.BottomLeft, '=' },
+                    {CharMapPositions.BottomRight, '=' },
+                    {CharMapPositions.BorderTop, '=' },
+                    {CharMapPositions.BorderBottom, '=' },
+                    {CharMapPositions.BorderLeft, '|' },
+                    {CharMapPositions.BorderRight, '|' },
+                })
+                .ExportAndWriteLine();
 
             WelcomeAnswer = (Console.ReadLine());
 
@@ -112,10 +133,10 @@ namespace CodingTracker2
 
         static void CreateTable()
         {
-            string dbFile = "URI=file:CodingTrackerDB.db";
+            string dbFile = "URI=FILE:CodingTrackerDB.db";
             SQLiteConnection connection = new SQLiteConnection(dbFile);
             connection.Open();
-            string tbl = "create table if not exists CodeTracker (DATE text, HOURS text);";
+            string tbl = "CREATE TABLE IF NOT EXISTS codetracker (DATE text, HOURS text);";
             SQLiteCommand command = new SQLiteCommand(tbl, connection);
             command.ExecuteNonQuery();
             connection.Close();
@@ -192,10 +213,10 @@ namespace CodingTracker2
            HoursString = HoursString.PadLeft(5, '0');
 
 
-            string dbFile = "URI=file:CodingTrackerDB.db";
+            string dbFile = "URI=FILE:CodingTrackerDB.db";
             SQLiteConnection connection = new SQLiteConnection(dbFile);
             connection.Open();
-            string AddHours = $"insert into CodeTracker (DATE,HOURS) values ('{DateString}','{HoursString}');";
+            string AddHours = $"INSERT INTO codetracker (DATE,HOURS) VALUES ('{DateString}','{HoursString}');";
             SQLiteCommand command = new SQLiteCommand(AddHours, connection);
             command.ExecuteNonQuery();
             connection.Close();
@@ -259,10 +280,10 @@ namespace CodingTracker2
                 }
             } while (!parseSuccess1);
 
-            string dbFile = "URI=file:CodingTrackerDB.db";
+            string dbFile = "URI=FILE:CodingTrackerDB.db";
             SQLiteConnection connection = new SQLiteConnection(dbFile);
             connection.Open();
-            string DeleteHours = $"Delete from CodeTracker where DATE= '{DateString}';";
+            string DeleteHours = $"DELETE FROM codetracker WHERE DATE= '{DateString}';";
             SQLiteCommand command = new SQLiteCommand(DeleteHours, connection);
             command.ExecuteNonQuery();
             connection.Close();
@@ -343,7 +364,7 @@ namespace CodingTracker2
                     string dbFile = "URI=file:CodingTrackerDB.db";
                     SQLiteConnection connection = new SQLiteConnection(dbFile);
                     connection.Open();
-                    string EditHours = $"update CodeTracker set HOURS='{HoursString}' where DATE= '{DateString}';";
+                    string EditHours = $"UPDATE codetracker SET HOURS='{HoursString}' WHERE DATE= '{DateString}';";
                     SQLiteCommand command = new SQLiteCommand(EditHours, connection);
                     command.ExecuteNonQuery();
                     connection.Close();
@@ -373,7 +394,7 @@ namespace CodingTracker2
                 Console.WriteLine("--------------------------------------------");
 
                 HoursString = default(string);
-                    parseSuccess2 = false;
+                parseSuccess2 = false;
 
                 
                 HoursString = (Console.ReadLine());
@@ -389,27 +410,63 @@ namespace CodingTracker2
             
         }
 
+
         static void ReadTable()
         {
-            string dbFile = "URI=file:CodingTrackerDB.db";
-            SQLiteConnection connection = new SQLiteConnection(dbFile);
+            string dbFile = "URI=FILE:CodingTrackerDB.db";
+            var connection = new SQLiteConnection(dbFile);
+
             connection.Open();
 
-            string stm = "SELECT * FROM CodeTracker LIMIT 5";
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = "SELECT * FROM codetracker";
 
-            using var command = new SQLiteCommand(stm, connection);
-            using SQLiteDataReader rdr = command.ExecuteReader();
+            List<CodeTracker> tableData = new List<CodeTracker>();
 
-            Console.WriteLine("----------------------------------");
-            Console.WriteLine("DD/MM/YYYY                  HOURS");
+            SQLiteDataReader reader = tableCmd.ExecuteReader();
 
-            while (rdr.Read())
-            {
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        tableData.Add(
+                        new CodeTracker
+                        {
+                            Date = new string(reader.GetString(0)),
+                            Hours = new string(reader.GetString(1))
+                        });  
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No data found.");
+                }
+                reader.Close();
 
-                Console.WriteLine($"{rdr.GetString(0)}                 {rdr.GetString(1)}");
+            ConsoleTableBuilder
+                .From(tableData)
+                .WithTitle("Coding Tracker ", ConsoleColor.Green, ConsoleColor.Black)
+                .WithTextAlignment(new Dictionary<int, TextAligntment>
+                    {
+                            {2, TextAligntment.Center}
+                    })
+                  .WithCharMapDefinition(new Dictionary<CharMapPositions, char> {
+                        {CharMapPositions.BottomLeft, '=' },
+                        {CharMapPositions.BottomCenter, '=' },
+                        {CharMapPositions.BottomRight, '=' },
+                        {CharMapPositions.BorderTop, '=' },
+                        {CharMapPositions.BorderBottom, '=' },
+                        {CharMapPositions.BorderLeft, '|' },
+                        {CharMapPositions.BorderRight, '|' },
+                        {CharMapPositions.DividerY, '|' },
+                        {CharMapPositions.DividerX, '-' },
+                    })
 
-            }
-            Console.WriteLine("----------------------------------");
+                .ExportAndWriteLine();
+                
+            Console.WriteLine("");
+            WelcomeMessage();
         }
     }
 }
+
