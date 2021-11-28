@@ -148,6 +148,9 @@ namespace CodingTracker2
             bool parseSuccess1 = false;
             bool parseSuccess2 = false;
             string DateString = "0", HoursString = "0";
+            string dbFile = "URI=FILE:CodingTrackerDB.db";
+            int count = 0;
+            
 
             do
             {
@@ -162,7 +165,29 @@ namespace CodingTracker2
 
                 if (DateTime.TryParseExact(DateString, "dd-MM-yyyy", new CultureInfo("en-US"), DateTimeStyles.None, out dDate))
                 {
-                    parseSuccess1 = true;
+                    SQLiteConnection connection2 = new SQLiteConnection(dbFile);
+                    connection2.Open();
+                    string CheckDate = $"SELECT count(*) FROM codetracker WHERE DATE= '{DateString}';";
+                    SQLiteCommand command2 = new SQLiteCommand(CheckDate, connection2);
+                    
+                    count = Convert.ToInt32(command2.ExecuteScalar());
+                   
+                    connection2.Close();
+
+                    if(count > 0)
+                    {
+                        Console.WriteLine("----------------------------------------------------------");
+                        Console.WriteLine("| Date already exists, please update with EDIT menu item |");
+                        Console.WriteLine("----------------------------------------------------------");
+                        
+                        WelcomeMessage();
+                    }
+                    else
+                    {
+                        parseSuccess1 = true;
+                    }
+                    
+
                 }
 
                 if (DateString == "0")
@@ -213,7 +238,6 @@ namespace CodingTracker2
            HoursString = HoursString.PadLeft(5, '0');
 
 
-            string dbFile = "URI=FILE:CodingTrackerDB.db";
             SQLiteConnection connection = new SQLiteConnection(dbFile);
             connection.Open();
             string AddHours = $"INSERT INTO codetracker (DATE,HOURS) VALUES ('{DateString}','{HoursString}');";
@@ -300,7 +324,9 @@ namespace CodingTracker2
             string DateString, HoursString;
             bool parseSuccess1 = false;
             bool parseSuccess2 = false;
+            int count = 0;
             DateTime dDate;
+            string dbFile = "URI=FILE:CodingTrackerDB.db";
 
             do
             {
@@ -314,7 +340,29 @@ namespace CodingTracker2
 
                 if (DateTime.TryParseExact(DateString, "dd-MM-yyyy", new CultureInfo("en-US"), DateTimeStyles.None, out dDate))
                 {
-                    parseSuccess1 = true;
+                    SQLiteConnection connection2 = new SQLiteConnection(dbFile);
+                    connection2.Open();
+                    string CheckDate = $"SELECT count(*) FROM codetracker WHERE DATE= '{DateString}';";
+                    SQLiteCommand command2 = new SQLiteCommand(CheckDate, connection2);
+
+                    count = Convert.ToInt32(command2.ExecuteScalar());
+
+                    connection2.Close();
+
+                    if (count > 0)
+                    {
+                        parseSuccess1 = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("----------------------------------------------------------");
+                        Console.WriteLine("|          Date does not exist, please try again          |");
+                        Console.WriteLine("----------------------------------------------------------");
+
+                        EditRow();
+                        
+                    }
+                    
                 }
 
                 if (DateString == "0")
@@ -361,7 +409,6 @@ namespace CodingTracker2
 
                 while (parseSuccess2)
                 {
-                    string dbFile = "URI=file:CodingTrackerDB.db";
                     SQLiteConnection connection = new SQLiteConnection(dbFile);
                     connection.Open();
                     string EditHours = $"UPDATE codetracker SET HOURS='{HoursString}' WHERE DATE= '{DateString}';";
